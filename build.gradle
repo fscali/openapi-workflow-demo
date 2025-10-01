@@ -39,9 +39,20 @@ tasks.register("makeRelease") {
         outputFile.text = ""
         fileTree("$rootDir/yamls").matching {
             include "**/*.yaml"
+            exclude "policies/**"
+            exclude "policy-catalog.yaml"
         }.files.sort().each { yaml ->
+            
             def content = yaml.text.replaceAll("\\.\\./policies", "./policies")
+
+            //def relativePath = yaml.toPath().relativize(file("$rootDir/yamls").toPath()).toString()
+            // in alternativa, path da yamls/ in poi
+            def pathFromYamls = yaml.absolutePath.split("/yamls/")[-1]
+
             outputFile << "---\n"
+            outputFile << "# File: ${pathFromYamls}\n"  // aggiunge commento con path
+
+           
             outputFile << content
             outputFile << "\n"
         }
@@ -60,5 +71,5 @@ tasks.register("packageRelease", Zip) {
         include "**/*"
     }
     archiveFileName.set("release.zip")
-    destinationDirectory.set(file("$rootDir/release"))
+    destinationDirectory.set(file("$rootDir/release/zip"))
   }
