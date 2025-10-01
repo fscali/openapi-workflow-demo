@@ -41,5 +41,5 @@ jobs:
         run: |
           for f in ${{ steps.changed.outputs.files }}; do
             echo "🔍 Validating $f"
-            ./gradlew validateYaml -Pfile=$f
+            ./gradlew validateYaml -Pfile=$(pwd)/$f
           done
