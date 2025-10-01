@@ -4,22 +4,33 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'yamls/**'
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Detect changed YAML files
+        id: changed
+        run: |
+          files=$(git diff --name-only origin/main...HEAD | grep '^yamls/.*\.yaml$' || true)
+          echo "files=$files" >> $GITHUB_OUTPUT
 
       - name: Set up JDK 17
+        if: steps.changed.outputs.files != ''
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          distribution: temurin
+          java-version: 17
+          cache: gradle
 
       - name: Run validator
+        if: steps.changed.outputs.files != ''
         run: |
-          cd validator
-          ./gradlew run
+          for f in ${{ steps.changed.outputs.files }}; do
+            echo "🔍 Validating $f"
+            ./gradlew validateYaml -Pfile=$f
+          done
