@@ -1,0 +1,14 @@
+openapi: 3.0.3
+info:
+  title: Payment API
+  version: 1.0.0
+paths:
+  /payments-new-4:
+    post:
+      summary: Create another payment
+      x-policies:
+        - $ref: "../policies/rate-limit.yaml"
+        - $ref: "../policies/jwt-auth.yaml"
+      responses:
+        "200":
+          description: OK
