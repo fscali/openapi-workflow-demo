@@ -1,0 +1,43 @@
+name: Build Release YAML
+
+on:
+  pull_request:
+    branches:
+      - release/sit
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Run Gradle makeRelease
+        run: ./gradlew makeRelease
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-yaml
+          path: release/full-release.yaml
+
+      - name: Create GitHub Release
+        if: github.event.pull_request.merged == true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: sit-release-${{ github.sha }}
+          name: SIT Release ${{ github.sha }}
+          body: "Release YAML generated from merged PR."
+          files: release/full-release.yaml
