@@ -1,0 +1,64 @@
+plugins {
+    id 'base'
+}
+
+subprojects {
+    apply plugin: 'java'
+    repositories {
+        mavenCentral()
+    }
+}
+
+tasks.register("makeRelease") {
+    group = "build"
+    description = "Concatenate YAMLs, adjust policy refs, and copy policies into release folder"
+
+    doLast {
+        def outputDir = file("$rootDir/release")
+        def outputFile = file("$outputDir/full-release.yaml")
+
+        // 1. Pulisce la cartella release
+        if (outputDir.exists()) {
+            outputDir.deleteDir()
+        }
+        outputDir.mkdirs()
+
+        // 2. Copia policies/
+        def policiesDir = file("$rootDir/policies")
+        if (policiesDir.exists()) {
+            copy {
+                from policiesDir
+                into "$outputDir/policies"
+            }
+            println "📂 Copied policies/ into release/"
+        } else {
+            println "⚠️ No policies/ folder found in project root"
+        }
+
+        // 3. Concatena YAMLs + sostituisce ../policies → ./policies
+        outputFile.text = ""
+        fileTree("$rootDir/yamls").matching {
+            include "**/*.yaml"
+        }.files.sort().each { yaml ->
+            def content = yaml.text.replaceAll("\\.\\./policies", "./policies")
+            outputFile << "---\n"
+            outputFile << content
+            outputFile << "\n"
+        }
+
+        println "✅ Release generated: ${outputFile}"
+    }
+
+  
+}
+tasks.register("packageRelease", Zip) {
+    group = "distribution"
+    description = "Package release folder into a zip file"
+    dependsOn("makeRelease")
+
+    from("$rootDir/release") {
+        include "**/*"
+    }
+    archiveFileName.set("release.zip")
+    destinationDirectory.set(file("$rootDir/release"))
+  }

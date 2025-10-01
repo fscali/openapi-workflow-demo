@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+application {
+    mainClass = 'com.company.validator.ValidatorMain'
+}
+
+dependencies {
+    implementation 'io.swagger.parser.v3:swagger-parser:2.1.20'
+    implementation 'org.yaml:snakeyaml:2.3'
+    // https://mvnrepository.com/artifact/com.github.erosb/everit-json-schema
+implementation("com.github.erosb:everit-json-schema:1.14.6")
+    implementation 'org.json:json:20231013'
+}
+
+tasks.register('validateYaml', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.company.validator.ValidatorMain'
+    args project.findProperty("file") ?: ""
+}

@@ -1,0 +1,4 @@
+name: jwt-auth
+config:
+  issuer: "https://auth.example.com"
+  audience: "payments"

@@ -1,0 +1,4 @@
+name: rate-limit
+config:
+  requests: 10
+  interval: "1m"

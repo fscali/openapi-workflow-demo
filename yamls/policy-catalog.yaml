@@ -1,0 +1,21 @@
+policies:
+  rate-limit:
+    configSchema: |
+      {
+        "type": "object",
+        "properties": {
+          "requests": { "type": "integer", "minimum": 1 },
+          "interval": { "type": "string" }
+        },
+        "required": ["requests", "interval"]
+      }
+  jwt-auth:
+    configSchema: |
+      {
+        "type": "object",
+        "properties": {
+          "issuer": { "type": "string" },
+          "audience": { "type": "string" }
+        },
+        "required": ["issuer", "audience"]
+      }
